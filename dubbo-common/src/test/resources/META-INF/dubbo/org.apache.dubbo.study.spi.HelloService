@@ -1,0 +1,2 @@
+china=org.apache.dubbo.study.spi.ChinaeseHelloService
+english=org.apache.dubbo.study.spi.EngishHelloService
