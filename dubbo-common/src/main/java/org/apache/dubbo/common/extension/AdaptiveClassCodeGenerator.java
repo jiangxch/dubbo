@@ -202,31 +202,32 @@ public class AdaptiveClassCodeGenerator {
         StringBuilder code = new StringBuilder(512);
         if (adaptiveAnnotation == null) {
             return generateUnsupported(method);
-        } else {
+        } else {// 有 Adaptive注解
             int urlTypeIndex = getUrlTypeIndex(method);
 
             // found parameter in URL type
             if (urlTypeIndex != -1) {
-                // Null Point check
+                // 从方法的参数中查找是否有URL入参
                 code.append(generateUrlNullCheck(urlTypeIndex));
             } else {
                 // did not find parameter in URL type
-                code.append(generateUrlAssignmentIndirectly(method));
+                code.append(generateUrlAssignmentIndirectly(method));// 从方法参数中找是否有获取Url的方法
             }
-
+            // 通过注解指定的key,注解key可以指定多个，所有value是数组类型
             String[] value = getMethodAdaptiveValue(adaptiveAnnotation);
 
+            // 方法的参数是否是 Invocation 类型
             boolean hasInvocation = hasInvocationArgument(method);
-
+            // 生成获取 Invocation 方法名称的代码
             code.append(generateInvocationArgumentNullCheck(method));
-
+            //生成通过注解指定key，从URL中获取对应值的方法,值会存在 extName 变量中
             code.append(generateExtNameAssignment(value, hasInvocation));
-            // check extName == null?
+            // 生成判断 extName 是否为null的代码
             code.append(generateExtNameNullCheck(value));
-
+            // 生成通过 SPI和extName 获取扩展对象的代码
             code.append(generateExtensionAssignment());
 
-            // return statement
+            // 生成执行扩展对象的代码
             code.append(generateReturnAndInvocation(method));
         }
 

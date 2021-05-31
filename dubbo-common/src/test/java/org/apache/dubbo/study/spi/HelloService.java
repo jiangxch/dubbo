@@ -1,5 +1,7 @@
 package org.apache.dubbo.study.spi;
 
+import org.apache.dubbo.common.URL;
+import org.apache.dubbo.common.extension.Adaptive;
 import org.apache.dubbo.common.extension.SPI;
 
 /**
@@ -8,5 +10,6 @@ import org.apache.dubbo.common.extension.SPI;
  */
 @SPI // @SPI 注解标识这个接口是一个可以进行SPI扩展的接口
 public interface HelloService {
-    String sayHello();
+    @Adaptive("hello")
+    String sayHello(URL url);
 }
