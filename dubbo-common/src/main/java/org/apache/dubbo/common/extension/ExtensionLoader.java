@@ -270,9 +270,9 @@ public class ExtensionLoader<T> {
      */
     public List<T> getActivateExtension(URL url, String[] values, String group) {
         List<T> activateExtensions = new ArrayList<>();
-        // solve the bug of using @SPI's wrapper method to report a null pointer exception.
         TreeMap<Class, T> activateExtensionsMap = new TreeMap<>(ActivateComparator.COMPARATOR);
         List<String> names = values == null ? new ArrayList<>(0) : asList(values);
+        // names 大多数情况都是 Empty
         if (!names.contains(REMOVE_VALUE_PREFIX + DEFAULT_KEY)) {
             getExtensionClasses();
             for (Map.Entry<String, Object> entry : cachedActivates.entrySet()) {
@@ -284,40 +284,19 @@ public class ExtensionLoader<T> {
                 if (activate instanceof Activate) {
                     activateGroup = ((Activate) activate).group();
                     activateValue = ((Activate) activate).value();
-                } else if (activate instanceof com.alibaba.dubbo.common.extension.Activate) {
-                    activateGroup = ((com.alibaba.dubbo.common.extension.Activate) activate).group();
-                    activateValue = ((com.alibaba.dubbo.common.extension.Activate) activate).value();
-                } else {
+                }  else {
                     continue;
                 }
-                if (isMatchGroup(group, activateGroup)
-                        && !names.contains(name)
+                if (isMatchGroup(group, activateGroup)// 判断是否匹配group
+                        && !names.contains(name) //
                         && !names.contains(REMOVE_VALUE_PREFIX + name)
-                        && isActive(activateValue, url)) {
+                        && isActive(activateValue, url)) { // 注解上的值是否在URL中包含
                     activateExtensionsMap.put(getExtensionClass(name), getExtension(name));
                 }
             }
             if(!activateExtensionsMap.isEmpty()){
                 activateExtensions.addAll(activateExtensionsMap.values());
             }
-        }
-        List<T> loadedExtensions = new ArrayList<>();
-        for (int i = 0; i < names.size(); i++) {
-            String name = names.get(i);
-            if (!name.startsWith(REMOVE_VALUE_PREFIX)
-                    && !names.contains(REMOVE_VALUE_PREFIX + name)) {
-                if (DEFAULT_KEY.equals(name)) {
-                    if (!loadedExtensions.isEmpty()) {
-                        activateExtensions.addAll(0, loadedExtensions);
-                        loadedExtensions.clear();
-                    }
-                } else {
-                    loadedExtensions.add(getExtension(name));
-                }
-            }
-        }
-        if (!loadedExtensions.isEmpty()) {
-            activateExtensions.addAll(loadedExtensions);
         }
         return activateExtensions;
     }
